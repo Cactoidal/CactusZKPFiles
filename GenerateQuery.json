@@ -1,0 +1,63 @@
+//import { ethers } from 'ethers';
+
+async function main() {
+
+    const circuitId = "credentialAtomicQuerySig";
+    const validatorAddress = "0xb1e86C4c687B85520eF4fd2a0d14e81970a15aFB";
+
+    // Grab the schema hash from Polygon ID Platform
+    const schemaHash = "3b7f2029926c3ad17e393705b76eec86"
+
+    const schemaEnd = fromLittleEndian(hexToBytes(schemaHash))
+
+    const stipendQuery = {
+    schema: ethers.BigNumber.from(schemaEnd),
+    slotIndex: 2,
+    operator: 1,
+    //value: 1, ...new Array(63).fill(0).map(i => 0),
+    value: [1, ...new Array(63).fill(0).map(i => 0)],   
+    circuitId,
+    };
+
+    CactuStipendAddress = "0x3A7772B5e1407524B6D57aaDAD226B4Ed56abFA7"
+
+    let cactuStipend = await hre.ethers.getContractAt("CactuStipendZKP", CactuStipendAddress)
+
+    const makeStipend =
+        await cactuStipend.createStipend(
+        "ZKP Stipend", //stipend name
+        "0xa9C30611208FF3b2F5E3414D2a95B706f5CE52Dd", //put caller address here.  make sure caller has approved contract's token allowance
+        "0x44B109a4613007a24eA2520B13F56396Cd6D41C7", //stipend token address
+        9999, //payment amount
+        1, //payment interval
+        100000000000000, //stipend balance
+        validatorAddress,
+        stipendQuery
+        );
+        console.log("Stipend created");
+    
+
+function hexToBytes(hex) {
+    for (var bytes = [], c = 0; c < hex.length; c += 2)
+        bytes.push(parseInt(hex.substr(c, 2), 16));
+    return bytes;
+}
+
+function fromLittleEndian(bytes) {
+    const n256 = BigInt(256);
+    let result = BigInt(0);
+    let base = BigInt(1);
+    bytes.forEach((byte) => {
+      result += base * BigInt(byte);
+      base = base * n256;
+    });
+    return result;
+  }
+}
+
+main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });
